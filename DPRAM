@@ -1,0 +1,41 @@
+module DPRAM #
+    (
+        parameter WIDTH = 8 ,
+        parameter DEPTH=1024 ,
+        parameter ADDR_WIDTH=10 //2^10=1024
+    )
+
+    (
+        input wr_clk,
+        input rd_clk,
+        input wr_en,
+        input rd_en,
+        input [WIDTH-1:0] wr_data,
+        input [ADDR_WIDTH-1:0] wr_addr,
+        input [ADDR_WIDTH-1:0] rd_addr,
+        input rd_rst_n,
+        output reg [WIDTH-1:0] rd_data
+    
+    );
+
+    reg [WIDTH-1:0] DPRAM [DEPTH-1:0];  //RAM for FIFO
+    
+    always@(posedge wr_clk) begin
+        if(wr_en)
+            DPRAM[wr_addr]<=wr_data;
+        else
+            DPRAM[wr_addr]<=DPRAM[wr_addr];
+    end
+
+    always@(posedge rd_clk or negedge rd_rst_n) begin
+        if(!rd_rst_n)
+            rd_data<= 'd0;
+        else if(rd_en)
+            rd_data<=DPRAM[rd_addr];
+        else
+            rd_data<=rd_data;
+    end
+
+
+
+endmodule
